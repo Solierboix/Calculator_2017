@@ -94,7 +94,35 @@ public class MainActivity extends AppCompatActivity {
             mOperand = Double.valueOf(value);
         } else {
             mOperand2 = Double.valueOf(value);
+
+            if(pendingOperation.equals("=")){
+                pendingOperation = operation;
+            }
+            switch (pendingOperation) {
+                case "=":
+                    mOperand = mOperand2;
+                    break;
+                case "/":
+                    if (mOperand2 == 0) {
+                        mOperand = 0.0;
+                    } else {
+                        mOperand /= mOperand2;
+                    }
+                    break;
+                case "*":
+                    mOperand *= mOperand2;
+                    break;
+                case "-":
+                    mOperand -= mOperand2;
+                    break;
+                case "+":
+                    mOperand += mOperand2;
+                    break;
+            }
         }
+
+        mResult.setText(mOperand.toString());
+        mNewNumber.setText("");
     }
 
 
