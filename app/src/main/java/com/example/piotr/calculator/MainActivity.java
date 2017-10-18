@@ -18,6 +18,9 @@ public class MainActivity extends AppCompatActivity {
     private Double mOperand2 = null;
     private String pendingOperation = "=";
 
+    private static final String STATE_PENDING_OPERATION = "PendingOperation";
+    private static final String STATE_OPERAND1 = "Operand1";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,10 +75,13 @@ public class MainActivity extends AppCompatActivity {
                 Button b = (Button) view;
                 String op = b.getText().toString();
                 String value = mNewNumber.getText().toString();
-                if (value.length() != 0) {
-                    performOperation(value, op);
+                try {
+                    Double doubleValue = Double.valueOf(value);
+                    performOperation(doubleValue, op);
+                } catch (NumberFormatException e){
+                    mNewNumber.setText("");
                 }
-                pendingOperation = op;
+               pendingOperation = op;
                 mDisplayOperation.setText(pendingOperation);
 
 
@@ -89,34 +95,51 @@ public class MainActivity extends AppCompatActivity {
         buttonPlus.setOnClickListener(opListener);
     }
 
-    private void performOperation(String value, String operation) {
-        if (null == mOperand) {
-            mOperand = Double.valueOf(value);
-        } else {
-            mOperand2 = Double.valueOf(value);
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(STATE_PENDING_OPERATION, pendingOperation);
+        if (mOperand != null) {
+            outState.putDouble(STATE_OPERAND1, mOperand);
+        }
+        super.onSaveInstanceState(outState);
 
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        pendingOperation = savedInstanceState.getString(STATE_PENDING_OPERATION);
+        mOperand = savedInstanceState.getDouble(STATE_OPERAND1);
+        mDisplayOperation.setText(pendingOperation);
+    }
+
+
+    private void performOperation(Double value, String operation) {
+        if (null == mOperand) {
+            mOperand = value;
+        } else {
             if(pendingOperation.equals("=")){
                 pendingOperation = operation;
             }
             switch (pendingOperation) {
                 case "=":
-                    mOperand = mOperand2;
+                    mOperand = value;
                     break;
                 case "/":
-                    if (mOperand2 == 0) {
+                    if (value == 0) {
                         mOperand = 0.0;
                     } else {
-                        mOperand /= mOperand2;
+                        mOperand /= value;
                     }
                     break;
                 case "*":
-                    mOperand *= mOperand2;
+                    mOperand *= value;
                     break;
                 case "-":
-                    mOperand -= mOperand2;
+                    mOperand -= value;
                     break;
                 case "+":
-                    mOperand += mOperand2;
+                    mOperand += value;
                     break;
             }
         }
